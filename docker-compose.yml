@@ -1,0 +1,32 @@
+﻿version: '3.1'
+
+services:
+  
+  estimate-be:
+    image: estimate-backend:latest
+    depends_on:
+      - postresql
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      DB_CONNECTION_STRING: 'host=postresql;port=5432;database=estimate;username=postgres;password=WETsVlFSDQRR2C0A2EDwXTjT'
+    networks:
+      - app
+    ports:
+      - 8000:80
+
+  postresql:
+    image: postgres:12-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: WETsVlFSDQRR2C0A2EDwXTjT
+    networks:
+      - app
+    ports:
+      - 5432:5432
+
+networks:
+  app:
+    driver: bridge

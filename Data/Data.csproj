@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <LangVersion>default</LangVersion>
+    <Nullable>enable</Nullable>
+    <RootNamespace>AspNetFlex.Data</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="PagedList, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\libs\PagedList.dll</HintPath>
+    </Reference>
+    <Reference Include="SpireX.RepositoryProvider, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\libs\SpireX.RepositoryProvider.dll</HintPath>
+    </Reference>
+    <Reference Include="SpireX.RepositoryProvider.Abstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\libs\SpireX.RepositoryProvider.Abstractions.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Api\Api.csproj" />
+    <ProjectReference Include="..\DatabaseStore\DatabaseStore.csproj" />
+    <ProjectReference Include="..\Domain\Domain.csproj" />
+  </ItemGroup>
+
+</Project>

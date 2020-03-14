@@ -1,0 +1,16 @@
+﻿{
+  "AllowedHosts": "*",
+  
+  "Security": {
+    "SigningKey": "vGq0BCPOPv1zwPf0BLRBxyEDNw5xFOR2mVGB4Cpp",
+    "Lifetime": "1d"
+  },
+  
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  }
+}
