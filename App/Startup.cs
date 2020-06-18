@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -12,22 +13,29 @@ namespace AspNetFlex.App
     public class Startup
     {
         public IWebHostEnvironment Environment { get; }
-        public IConfiguration Configuration { get; }
+        public IConfiguration Config { get; }
 
         public Startup(IWebHostEnvironment environment, IConfiguration configuration)
         {
             Environment = environment;
-            Configuration = configuration;
+            Config = configuration;
         }
-        
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
+
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc(options => { options.EnableEndpointRouting = false; })
-                .SetCompatibilityVersion(CompatibilityVersion.Latest)
+            services.AddMvcCore(options =>
+                {
+                    options.EnableEndpointRouting = false;
+                }).SetCompatibilityVersion(CompatibilityVersion.Latest)
                 .AddApplicationPart(ApiModule.Assembly)
-                .AddControllersAsServices();
+                .AddControllersAsServices()
+                .AddApiExplorer();
+            
+            services.AddApiVersioning(options => options.ReportApiVersions = true);
+            services.AddVersionedApiExplorer(options =>
+            {
+                options.SubstituteApiVersionInUrl = true;
+            });
 
             services.AddCors(options =>
             {
@@ -43,14 +51,15 @@ namespace AspNetFlex.App
             services.AddServicesInstaller(options =>
             {
                 options.Environment = Environment.EnvironmentName;
-                options.Configuration = Configuration;
+                options.Configuration = Config;
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(
+            IApplicationBuilder app, 
+            IWebHostEnvironment env, 
+            IApiVersionDescriptionProvider provider)
         {
-            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -62,6 +71,16 @@ namespace AspNetFlex.App
             app.UseCors();
             app.UseAuthentication();
             app.UseMvc();
+            app.UseSwagger();
+            app.UseSwaggerUI(options =>
+            {
+                foreach (var desc in provider.ApiVersionDescriptions)
+                {
+                    options.SwaggerEndpoint(
+                        $"/swagger/{desc.GroupName}/swagger.json",
+                        desc.GroupName.ToUpperInvariant());
+                }
+            });
         }
     }
 }

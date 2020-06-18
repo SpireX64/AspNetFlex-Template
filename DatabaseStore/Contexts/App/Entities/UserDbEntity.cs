@@ -20,7 +20,8 @@ namespace AspNetFlex.DatabaseStore.Contexts.App.Entities
                 builder.ToTable("users").HasKey(e => e.Id);
                 builder.HasIndex(e => e.Email);
 
-                builder.Property(e => e.Id).HasColumnName("id");
+                builder.Property(e => e.Id).HasColumnName("id")
+                    .ValueGeneratedOnAdd();
                 builder.Property(e => e.Name).HasColumnName("name");
                 builder.Property(e => e.Email).HasColumnName("email");
                 builder.Property(e => e.PasswordHash).HasColumnName("pass_hash");

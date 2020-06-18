@@ -19,6 +19,7 @@ namespace AspNetFlex.Api.V1.Auth.Models
         public static UserResponseModel AsResponse(this UserModel user) =>
             new UserResponseModel
             {
+                Id = user.Id,
                 Name = user.Name,
                 Email = user.Email,
                 RegistrationDate = user.RegistrationDate.ToString()

@@ -17,9 +17,8 @@ namespace AspNetFlex.App
             CreateHost(args).Boot();
         }
 
-        private static WebHostBootstrap CreateHost(string[] args)
-        {
-            var builder = Host.CreateDefaultBuilder(args).ConfigureWebHostDefaults(config =>
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args).ConfigureWebHostDefaults(config =>
             {
                 config.UseContentRoot(Directory.GetCurrentDirectory());
                 config.UseKestrel();
@@ -29,6 +28,10 @@ namespace AspNetFlex.App
                 LoadEnvironmentConfiguration(config);
                 config.ConfigureLogging((ConfigureLogging));
             });
+
+        private static WebHostBootstrap CreateHost(string[] args)
+        {
+            var builder = CreateHostBuilder(args);
 
             var hostBoot = WebHostBootstrap.ForHost(builder.Build())
                 .UseBootable<DatabaseBootable>()

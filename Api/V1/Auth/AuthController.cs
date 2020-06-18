@@ -17,7 +17,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace AspNetFlex.Api.V1.Auth
 {
     [ApiController]
-    [Route(ApiRouter.Auth.Url)]
+    [ApiVersion("1")]
+    [Route(ApiRouter.Auth.Route)]
+    [Produces("application/json")]
     public class AuthController : ApiControllerBase
     {
         public AuthController(IMediator mediator): base(mediator)
@@ -36,25 +38,27 @@ namespace AspNetFlex.Api.V1.Auth
             try
             {
                 var auth = await Mediator.Send(command, cancellationToken);
-                response = ApiResult(HttpStatusCode.OK, auth.AsResponse());
+                response = ApiOk(auth.AsResponse());
             }
             catch (InvalidEmailFormatException ex)
             {
-                response = ApiError(HttpStatusCode.BadRequest, ApiErrors.InvalidEmailFormat, ex.Email);
+                response = ApiBadRequest(ApiErrors.InvalidEmailFormat, ex.Email);
             }
             catch (UserNotFoundByEmailException)
             {
-                response = ApiError(HttpStatusCode.BadRequest, ApiErrors.UserIdentityNotExists);
+                response = ApiBadRequest(ApiErrors.UserIdentityNotExists);
             }
             catch (WrongPasswordException)
             {
-                response = ApiError(HttpStatusCode.BadRequest, ApiErrors.IncorrectPassword);
+                response = ApiBadRequest( ApiErrors.IncorrectPassword);
             }
 
             return response;
         }
 
         [HttpPost("register")]
+        [ProducesResponseType(typeof(ApiResponse<UserResponseModel>), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponseEmpty), (int) HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Register(
             [FromBody] RegistrationRequest registrationRequest,
             CancellationToken cancellationToken)
@@ -67,23 +71,23 @@ namespace AspNetFlex.Api.V1.Auth
             try
             {
                 var registrationResult = await Mediator.Send(command, cancellationToken);
-                return ApiResult(HttpStatusCode.OK, registrationResult.AsResponse());
+                return ApiOk(registrationResult.AsResponse());
             }
             catch (InvalidEmailFormatException ex)
             {
-                return ApiError(HttpStatusCode.BadRequest, ApiErrors.InvalidEmailFormat, ex.Email);
+                return ApiBadRequest(ApiErrors.InvalidEmailFormat, ex.Email);
             }
             catch (UserAlreadyExistsException)
             {
-                return ApiError(HttpStatusCode.BadRequest, ApiErrors.UserIdentityAlreadyExists);
+                return ApiBadRequest(ApiErrors.UserIdentityAlreadyExists);
             }
             catch (InvalidNameFormatException)
             {
-                return ApiError(HttpStatusCode.BadRequest, ApiErrors.InvalidUserNameFormat);
+                return ApiBadRequest(ApiErrors.InvalidUserNameFormat);
             }
             catch (WeakPasswordException)
             {
-                return ApiError(HttpStatusCode.BadRequest, ApiErrors.WeakPassword);
+                return ApiBadRequest(ApiErrors.WeakPassword);
             }
         }
 
@@ -93,8 +97,8 @@ namespace AspNetFlex.Api.V1.Auth
         {
             var user = await GetCurrentUserAsync();
             return user is null 
-                ? ApiEmpty(HttpStatusCode.Unauthorized) 
-                : ApiResult(HttpStatusCode.OK, user.AsResponse());
+                ? ApiUnauthorized(ApiErrors.Unauthorized) 
+                : ApiOk(user.AsResponse());
         }
     }
 }

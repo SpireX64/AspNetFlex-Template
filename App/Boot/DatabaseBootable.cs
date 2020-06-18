@@ -6,6 +6,11 @@ using SpireX.AspNetCore.Boot;
 
 namespace AspNetFlex.App.Boot
 {
+    /**
+     * Checks database connection and performs migrations
+     */
+    
+    // ReSharper disable once ClassNeverInstantiated.Global
     public class DatabaseBootable : Bootable
     {
         private readonly AppDbContext _dbContext;

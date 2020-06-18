@@ -20,45 +20,58 @@ namespace AspNetFlex.Api.Common
             Mediator = mediator;
         }
         
-        protected Guid GetLoggedUserId()
+        protected Guid? GetLoggedUserId()
         {
+            if (User is null) 
+                return null;
+            
             var claim = User.FindFirst(ClaimTypes.PrimarySid);
-            if (Guid.TryParse(claim.Value, out var userId))
+            if (Guid.TryParse(claim?.Value, out var userId))
             {
                 return userId;
             }
-            throw new Exception("Can't provide user id");
+
+            return null;
         }
 
         protected Task<UserModel> GetCurrentUserAsync()
         {
             var currentUserId = GetLoggedUserId();
-            return Mediator.Send(new GetUserByIdQuery(currentUserId));
+            return currentUserId.HasValue ? 
+                Mediator.Send(new GetUserByIdQuery(currentUserId.Value)) : 
+                Task.FromResult<UserModel>(null!);
         }
 
         #region Api responses
-        
-        protected IActionResult ApiResult<T>(HttpStatusCode status, T data) where T : class
-        {
-            var apiResponse = new Models.ApiResponse<T>(status) { Data = data };
-            return Ok(apiResponse);
-        }
 
-        protected IActionResult ApiError(HttpStatusCode status, ApiError error, params object[] args)
-        {
-            var errorResponse = new ApiResponseError
-            {
-                Code = error.Code, 
-                Message = string.Format(error.Message, args)
-            };
-            return Ok(new ApiResponseEmpty(status){ Error = errorResponse });
-        }
+        protected IActionResult ApiOk<T>(T data) where T : class => 
+            Ok(BuildModelResponse(HttpStatusCode.OK, data));
 
-        protected IActionResult ApiEmpty(HttpStatusCode status)
-        {
-            return Ok(new ApiResponseEmpty(status));
-        }
-        
+        protected IActionResult ApiOk() => 
+            Ok(new ApiResponseEmpty(HttpStatusCode.OK));
+
+        protected IActionResult ApiBadRequest(ApiError error, params object[] args) => 
+            BadRequest(BuildErrorResponse(HttpStatusCode.BadRequest, error, args));
+
+        protected IActionResult ApiNotFound(ApiError error, params object[] args) => 
+            NotFound(BuildErrorResponse(HttpStatusCode.NotFound, error, args));
+
+        protected IActionResult ApiUnauthorized(ApiError error, params object[] args) => 
+            Unauthorized(BuildErrorResponse(HttpStatusCode.Unauthorized, error, args));
+
         #endregion
+        
+        private ApiResponse<T> BuildModelResponse<T>(HttpStatusCode statusCode, T data) where T: class => 
+            new ApiResponse<T>(statusCode){ Data = data};
+
+        private ApiResponseEmpty BuildErrorResponse(HttpStatusCode statusCode, ApiError error, params object[] args) =>
+            new ApiResponseEmpty(statusCode)
+            {
+                Error = new ApiResponseError()
+                {
+                    Code = error.Code,
+                    Message = string.Format(error.Message, args)
+                }
+            };
     }
 }

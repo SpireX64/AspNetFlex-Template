@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using AspNetFlex.Domain.Interactions.Users.Commands.RegisterUser;
 using AspNetFlex.Domain.Interactions.Users.Exceptions;
@@ -72,6 +73,7 @@ namespace AspNetFlex.Domain.UnitTests.Interactions.Users
             // ---- Assert ----
             
             Assert.NotNull(result);
+            Assert.AreNotEqual(Guid.Empty, result.Id);
             Assert.AreEqual(email, result.Email);
             Assert.AreEqual(name, result.Name);
             Assert.AreEqual(_fakeClock.GetCurrentInstant(), result.RegistrationDate);
